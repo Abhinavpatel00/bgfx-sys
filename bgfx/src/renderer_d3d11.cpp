@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 Branimir Karadzic. All rights reserved.
+ * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
@@ -46,7 +46,7 @@ namespace bgfx { namespace d3d11
 		{ D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,     1, 1, 0 },
 		{ D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED,     0, 0, 0 },
 	};
-	BX_STATIC_ASSERT(Topology::Count == BX_COUNTOF(s_primInfo)-1);
+	static_assert(Topology::Count == BX_COUNTOF(s_primInfo)-1);
 
 	union Zero
 	{
@@ -300,7 +300,7 @@ namespace bgfx { namespace d3d11
 		{ DXGI_FORMAT_R32_TYPELESS,       DXGI_FORMAT_R32_FLOAT,             DXGI_FORMAT_D32_FLOAT,         DXGI_FORMAT_UNKNOWN              }, // D32F
 		{ DXGI_FORMAT_R24G8_TYPELESS,     DXGI_FORMAT_R24_UNORM_X8_TYPELESS, DXGI_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_UNKNOWN              }, // D0S8
 	};
-	BX_STATIC_ASSERT(TextureFormat::Count == BX_COUNTOF(s_textureFormat) );
+	static_assert(TextureFormat::Count == BX_COUNTOF(s_textureFormat) );
 
 	static const D3D11_INPUT_ELEMENT_DESC s_attrib[] =
 	{
@@ -323,7 +323,7 @@ namespace bgfx { namespace d3d11
 		{ "TEXCOORD",     6, DXGI_FORMAT_R32G32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",     7, DXGI_FORMAT_R32G32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	BX_STATIC_ASSERT(Attrib::Count == BX_COUNTOF(s_attrib) );
+	static_assert(Attrib::Count == BX_COUNTOF(s_attrib) );
 
 	static const DXGI_FORMAT s_attribType[][4][2] =
 	{
@@ -358,7 +358,7 @@ namespace bgfx { namespace d3d11
 			{ DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT },
 		},
 	};
-	BX_STATIC_ASSERT(AttribType::Count == BX_COUNTOF(s_attribType) );
+	static_assert(AttribType::Count == BX_COUNTOF(s_attribType) );
 
 	static D3D11_INPUT_ELEMENT_DESC* fillVertexLayout(uint8_t _stream, D3D11_INPUT_ELEMENT_DESC* _out, const VertexLayout& _layout)
 	{
@@ -874,8 +874,6 @@ namespace bgfx { namespace d3d11
 			}
 #endif // USE_D3D11_DYNAMIC_LIB
 
-			m_device = (ID3D11Device*)g_platformData.context;
-
 			if (!m_dxgi.init(g_caps) )
 			{
 				goto error;
@@ -883,8 +881,10 @@ namespace bgfx { namespace d3d11
 
 			errorState = ErrorState::LoadedDXGI;
 
-			if (NULL != m_device)
+			if (NULL != g_platformData.context)
 			{
+				m_device = (ID3D11Device*)g_platformData.context;
+
 				m_device->AddRef();
 				m_device->GetImmediateContext(&m_deviceCtx);
 
@@ -1635,13 +1635,13 @@ namespace bgfx { namespace d3d11
 #endif // USE_D3D11_DYNAMIC_LIB
 
 				m_dxgi.shutdown();
-				BX_FALLTHROUGH;
+				[[fallthrough]];
 
 #if USE_D3D11_DYNAMIC_LIB
 			case ErrorState::LoadedD3D11:
 				bx::dlclose(m_d3d11Dll);
 				m_d3d11Dll = NULL;
-				BX_FALLTHROUGH;
+				[[fallthrough]];
 #endif // USE_D3D11_DYNAMIC_LIB
 
 			case ErrorState::Default:
@@ -3399,10 +3399,10 @@ namespace bgfx { namespace d3d11
 				{
 				case UniformType::Mat3:
 				case UniformType::Mat3|kUniformFragmentBit:
-					 {
+					{
 						 float* value = (float*)data;
 						 for (uint32_t ii = 0, count = num/3; ii < count; ++ii,  loc += 3*16, value += 9)
-						 {
+						{
 							 Matrix4 mtx;
 							 mtx.un.val[ 0] = value[0];
 							 mtx.un.val[ 1] = value[1];
@@ -3830,7 +3830,7 @@ namespace bgfx { namespace d3d11
 		}
 		else if (m_dynamic)
 		{
-#if USE_D3D11_STAGING_BUFFER
+#if BGFX_CONFIG_RENDERER_DIRECT3D11_USE_STAGING_BUFFER
 			desc.Usage          = D3D11_USAGE_DEFAULT;
 			desc.CPUAccessFlags = 0;
 
@@ -3855,7 +3855,7 @@ namespace bgfx { namespace d3d11
 				, NULL
 				, &m_ptr
 				) );
-#endif // USE_D3D11_STAGING_BUFFER
+#endif // BGFX_CONFIG_RENDERER_DIRECT3D11_USE_STAGING_BUFFER
 		}
 		else
 		{
@@ -3887,7 +3887,7 @@ namespace bgfx { namespace d3d11
 		ID3D11DeviceContext* deviceCtx = s_renderD3D11->m_deviceCtx;
 		BX_ASSERT(m_dynamic, "Must be dynamic!");
 
-#if USE_D3D11_STAGING_BUFFER
+#if BGFX_CONFIG_RENDERER_DIRECT3D11_USE_STAGING_BUFFER
 		BX_UNUSED(_discard);
 
 		D3D11_MAPPED_SUBRESOURCE mapped;
@@ -5877,7 +5877,7 @@ namespace bgfx { namespace d3d11
 						const VertexBufferD3D11& vb = m_vertexBuffers[compute.m_indirectBuffer.idx];
 						ID3D11Buffer* ptr = vb.m_ptr;
 
-						uint32_t numDrawIndirect = UINT16_MAX == compute.m_numIndirect
+						uint32_t numDrawIndirect = UINT32_MAX == compute.m_numIndirect
 							? vb.m_size/BGFX_CONFIG_DRAW_INDIRECT_STRIDE
 							: compute.m_numIndirect
 							;
@@ -6332,7 +6332,7 @@ namespace bgfx { namespace d3d11
 
 						if (isValid(draw.m_indexBuffer) )
 						{
-							numDrawIndirect = UINT16_MAX == draw.m_numIndirect
+							numDrawIndirect = UINT32_MAX == draw.m_numIndirect
 								? vb.m_size/BGFX_CONFIG_DRAW_INDIRECT_STRIDE
 								: draw.m_numIndirect
 								;
@@ -6346,7 +6346,7 @@ namespace bgfx { namespace d3d11
 						}
 						else
 						{
-							numDrawIndirect = UINT16_MAX == draw.m_numIndirect
+							numDrawIndirect = UINT32_MAX == draw.m_numIndirect
 								? vb.m_size/BGFX_CONFIG_DRAW_INDIRECT_STRIDE
 								: draw.m_numIndirect
 								;
@@ -6622,7 +6622,6 @@ namespace bgfx { namespace d3d11
 				}
 
 				tvm.printf(10, pos++, 0x8b, "      Indices: %7d ", statsNumIndices);
-//				tvm.printf(10, pos++, 0x8b, " Uniform size: %7d, Max: %7d ", _render->m_uniformEnd, _render->m_uniformMax);
 				tvm.printf(10, pos++, 0x8b, "     DVB size: %7d ", _render->m_vboffset);
 				tvm.printf(10, pos++, 0x8b, "     DIB size: %7d ", _render->m_iboffset);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 Branimir Karadzic. All rights reserved.
+ * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
@@ -77,7 +77,7 @@ static PosTexcoordVertex s_cubeVertices[] =
 	{-1.0f, -1.0f,  1.0f, -2.0f, -2.0f,  2.0f },
 	{ 1.0f, -1.0f,  1.0f,  2.0f, -2.0f,  2.0f },
 };
-BX_STATIC_ASSERT(BX_COUNTOF(s_cubeVertices) == 28);
+static_assert(BX_COUNTOF(s_cubeVertices) == 28);
 
 static const uint16_t s_cubeIndices[] =
 {
@@ -99,7 +99,7 @@ static const uint16_t s_cubeIndices[] =
 	20, 22, 21, // 10
 	21, 22, 23,
 };
-BX_STATIC_ASSERT(BX_COUNTOF(s_cubeIndices) == 36);
+static_assert(BX_COUNTOF(s_cubeIndices) == 36);
 
 bx::Vec3 s_faceColors[] =
 {
@@ -247,7 +247,7 @@ public:
 		init.vendorId = args.m_pciId;
 		init.platformData.nwh  = entry::getNativeWindowHandle(entry::kDefaultWindowHandle);
 		init.platformData.ndt  = entry::getNativeDisplayHandle();
-		init.platformData.type = entry::getNativeWindowHandleType(entry::kDefaultWindowHandle);
+		init.platformData.type = entry::getNativeWindowHandleType();
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
@@ -295,7 +295,7 @@ public:
 		m_textures[22] = loadTextureWithUpdate("textures/texture_compression_atci.dds");
 		m_textures[23] = loadTextureWithUpdate("textures/texture_compression_atce.dds");
 
-		BX_STATIC_ASSERT(24 == BX_COUNTOF(m_textures));
+		static_assert(24 == BX_COUNTOF(m_textures));
 
 		const bgfx::Caps* caps = bgfx::getCaps();
 		m_texture3DSupported = !!(caps->supported & BGFX_CAPS_TEXTURE_3D);
@@ -754,7 +754,7 @@ public:
 					"compute",
 					"frameBuffer",
 			};
-			BX_STATIC_ASSERT(BX_COUNTOF(descTextureCube) == BX_COUNTOF(m_textureCube));
+			static_assert(BX_COUNTOF(descTextureCube) == BX_COUNTOF(m_textureCube));
 
 			for (uint32_t ii = 0; ii < BX_COUNTOF(m_textureCube); ++ii)
 			{
@@ -847,7 +847,7 @@ public:
 				"update\natci",
 				"update\natce",
 			};
-			BX_STATIC_ASSERT(BX_COUNTOF(descTextures)  == BX_COUNTOF(m_textures));
+			static_assert(BX_COUNTOF(descTextures)  == BX_COUNTOF(m_textures));
 
 			for (uint32_t ii = 0; ii < BX_COUNTOF(m_textures); ++ii)
 			{
@@ -878,7 +878,7 @@ public:
 					"Tex3D R16F",
 					"Tex3D R32F",
 			};
-			BX_STATIC_ASSERT(BX_COUNTOF(descTextures3d) == BX_COUNTOF(m_textures3d));
+			static_assert(BX_COUNTOF(descTextures3d) == BX_COUNTOF(m_textures3d));
 
 			for (uint32_t ii = 0; ii < m_numTextures3d; ++ii)
 			{
