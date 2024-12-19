@@ -7,7 +7,7 @@ repository = "https://github.com/emoon/bgfx-sys"
 documentation = "https://docs.rs/bgfx-sys/0.14/bgfx-sys"
 readme = "readme.md"
 name = "bgfx-sys"
-version = "0.15.0"
+version = "0.16.0"
 edition = "2018"
 build = "build.rs"
 
