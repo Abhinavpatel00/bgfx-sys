@@ -9,7 +9,7 @@ SAMPLER2D(s_texOcclusionDepth, 0);
 
 BUFFER_RO(instanceDataIn, vec4, 1);
 BUFFER_RW(drawcallInstanceCount, uint, 2);
-BUFFER_WR(instancePredicates, bool, 3);
+BUFFER_WO(instancePredicates, bool, 3);
 
 uniform vec4 u_inputRTSize;
 uniform vec4 u_cullingConfig;
@@ -51,7 +51,7 @@ void main()
 			//transform World space aaBox to NDC
 			vec4 clipPos = mul( u_viewProj, vec4(boxCorners[i], 1) );
 
-#if BGFX_SHADER_LANGUAGE_GLSL 
+#if BGFX_SHADER_LANGUAGE_GLSL
 			clipPos.z = 0.5 * ( clipPos.z + clipPos.w );
 #endif
 			clipPos.z = max(clipPos.z, 0);

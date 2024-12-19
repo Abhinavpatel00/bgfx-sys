@@ -117,12 +117,12 @@ fn main() {
     build.file("bgfx/src/shader_dxbc.cpp");
     build.file("bgfx/src/renderer_agc.cpp");
     build.file("bgfx/src/renderer_gnm.cpp");
-    build.file("bgfx/src/renderer_webgpu.cpp");
+    //    build.file("bgfx/src/renderer_webgpu.cpp");
     build.file("bgfx/src/renderer_nvn.cpp");
     build.file("bgfx/src/renderer_gl.cpp");
     build.file("bgfx/src/renderer_vk.cpp");
     build.file("bgfx/src/renderer_noop.cpp");
-    build.file("bgfx/src/renderer_d3d9.cpp");
+    // build.file("bgfx/src/renderer_d3d.cpp");
     build.file("bgfx/src/renderer_d3d11.cpp");
     build.file("bgfx/src/renderer_d3d12.cpp");
 
@@ -161,6 +161,14 @@ fn main() {
         println!("cargo:rustc-link-lib=pthread");
         println!("cargo:rustc-link-lib=stdc++");
         println!("cargo:rustc-link-lib=GL");
-        println!("cargo:rustc-link-lib=X11");
+        //    println!("cargo:rustc-link-lib=X11");
+
+        if std::env::var("XDG_SESSION_TYPE").map_or(false, |v| v == "wayland") {
+            println!("cargo:rustc-link-lib=wayland-client");
+            println!("cargo:rustc-link-lib=wayland-egl");
+            println!("cargo:rustc-link-lib=wayland-cursor");
+        } else {
+            println!("cargo:rustc-link-lib=X11");
+        }
     }
 }

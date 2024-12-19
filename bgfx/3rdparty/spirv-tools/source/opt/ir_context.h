@@ -84,7 +84,7 @@ class IRContext {
     kAnalysisTypes = 1 << 15,
     kAnalysisDebugInfo = 1 << 16,
     kAnalysisLiveness = 1 << 17,
-    kAnalysisEnd = 1 << 17
+    kAnalysisEnd = 1 << 18
   };
 
   using ProcessFunction = std::function<bool(Function*)>;
@@ -202,8 +202,9 @@ class IRContext {
   inline IteratorRange<Module::const_inst_iterator> debugs3() const;
 
   // Iterators for debug info instructions (excluding OpLine & OpNoLine)
-  // contained in this module.  These are OpExtInst for DebugInfo extension
-  // placed between section 9 and 10.
+  // contained in this module.  These are OpExtInst &
+  // OpExtInstWithForwardRefsKHR for DebugInfo extension placed between section
+  // 9 and 10.
   inline Module::inst_iterator ext_inst_debuginfo_begin();
   inline Module::inst_iterator ext_inst_debuginfo_end();
   inline IteratorRange<Module::inst_iterator> ext_inst_debuginfo();
@@ -229,6 +230,8 @@ class IRContext {
   inline void AddExtInstImport(std::unique_ptr<Instruction>&& e);
   // Set the memory model for this module.
   inline void SetMemoryModel(std::unique_ptr<Instruction>&& m);
+  // Get the memory model for this module.
+  inline const Instruction* GetMemoryModel() const;
   // Appends an entry point instruction to this module.
   inline void AddEntryPoint(std::unique_ptr<Instruction>&& e);
   // Appends an execution mode instruction to this module.
@@ -252,6 +255,8 @@ class IRContext {
   inline void AddType(std::unique_ptr<Instruction>&& t);
   // Appends a constant, global variable, or OpUndef instruction to this module.
   inline void AddGlobalValue(std::unique_ptr<Instruction>&& v);
+  // Prepends a function declaration to this module.
+  inline void AddFunctionDeclaration(std::unique_ptr<Function>&& f);
   // Appends a function to this module.
   inline void AddFunction(std::unique_ptr<Function>&& f);
 
@@ -1154,6 +1159,10 @@ void IRContext::SetMemoryModel(std::unique_ptr<Instruction>&& m) {
   module()->SetMemoryModel(std::move(m));
 }
 
+const Instruction* IRContext::GetMemoryModel() const {
+  return module()->GetMemoryModel();
+}
+
 void IRContext::AddEntryPoint(std::unique_ptr<Instruction>&& e) {
   module()->AddEntryPoint(std::move(e));
 }
@@ -1211,6 +1220,10 @@ void IRContext::AddGlobalValue(std::unique_ptr<Instruction>&& v) {
     get_def_use_mgr()->AnalyzeInstDefUse(&*v);
   }
   module()->AddGlobalValue(std::move(v));
+}
+
+void IRContext::AddFunctionDeclaration(std::unique_ptr<Function>&& f) {
+  module()->AddFunctionDeclaration(std::move(f));
 }
 
 void IRContext::AddFunction(std::unique_ptr<Function>&& f) {
